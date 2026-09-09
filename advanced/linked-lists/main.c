@@ -1,75 +1,79 @@
-#include <_stdio.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/_types/_errno_t.h>
-
 // -fsanitize=adress
 typedef struct node node_t;
 
 struct node {
-  int8_t value;
+  int val;
   node_t *next;
 };
 
 void print_list(node_t *head) {
   node_t *current = head;
   while (current != NULL) {
-    printf("%d", current->value);
+    printf("%d ", current->val);
     current = current->next;
   }
 }
 
-void append_list(node_t *head, int8_t n) {
-  node_t *current = head;
-  while (current != NULL)
-    current = current->next;
+void append_list(node_t **head, int n) {
   node_t *newNode = malloc(sizeof(node_t));
-  newNode->value = n;
+  if(newNode == NULL) return;
+  newNode->val = n;
   newNode->next = NULL;
+
+  if (*head == NULL) {
+    *head = newNode;
+    return;
+  }
+
+  node_t *current = *head;
+  while (current->next != NULL)
+    current = current->next;
+
   current->next = newNode;
 }
 
-node_t *push_list(node_t *head, int8_t n) {
+node_t *push_list(node_t *head, int n) {
   node_t *newNode = malloc(sizeof(node_t));
   if (newNode == NULL)
     return head;
-  newNode->value = n;
+  newNode->val = n;
   newNode->next = head;
   return newNode;
 }
 
-int8_t pop_list(node_t **head) {
+int pop_list(node_t **head) {
   if (head == NULL)
     return -1;
   node_t *newHead = (*head)->next;
-  int8_t val = (*head)->value;
+  int val = (*head)->val;
   free(*head);
   *head = newHead;
   return val;
 }
 
-int8_t return_last_list(node_t *head) {
-  int8_t return_value;
+int return_last_list(node_t *head) {
+  int return_val;
   if (head->next == NULL) {
-    return_value = head->value;
+    return_val = head->val;
     free(head);
-    return return_value;
+    return return_val;
   }
 
   node_t *current = head;
   while (current->next->next != NULL) {
     current = current->next;
   }
-  return_value = current->next->value;
+  return_val = current->next->val;
   free(current->next);
   current->next = NULL;
-  return return_value;
+  return return_val;
 }
 
-int8_t remove_by_index(node_t **head, int8_t index) {
-  int8_t curr_index = 0;
-  int8_t return_value;
+int remove_by_index(node_t **head, int index) {
+  int curr_index = 0;
+  int return_val;
 
   node_t *current_node = *head;
   node_t *temp_node = NULL;
@@ -87,34 +91,45 @@ int8_t remove_by_index(node_t **head, int8_t index) {
     return -1;
 
   temp_node = current_node->next;
-  return_value = temp_node->value;
+  return_val = temp_node->val;
   current_node->next = temp_node->next;
   free(temp_node);
-  return return_value;
+  return return_val;
 }
 
-int return_by_value(node_t **head, int val){
+int remove_by_value(node_t **head, int val){
   if (*head == NULL){
     return -1;
   }
-
   node_t *current_node = *head;
   node_t *temp_node = NULL;
+  // retorna primeiro elemento
+  if (current_node->val == val){
+    return pop_list(head);    
+  }  
 
-  if(current_node->value == val){
-    return pop_list(head);
+  while(current_node->next->val != val){
+    if (current_node->next == NULL) {
+      return -1;
+    }
+    current_node = current_node->next;
   }
-  /*TODO: deal with edge cases */
-  return 0;  
+
+  int return_val = current_node->next->val;
+  temp_node = current_node->next;
+  current_node->next = temp_node->next;
+  free(temp_node);
+  return return_val;  
 }
 
 
 int main() {
-  node_t *head = NULL;
-  head = malloc(sizeof(node_t));
-  if (head == NULL)
-    return 1;
-  head->value = 1;
-  head->next = NULL;
-  return 0;
+
+  node_t *test_list= NULL;
+  append_list(&test_list, 1);
+  append_list(&test_list, 2);
+  append_list(&test_list, 3);
+  append_list(&test_list, 4);
+  remove_by_value(&test_list, 3);
+  print_list(test_list);
 }
