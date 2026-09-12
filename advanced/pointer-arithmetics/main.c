@@ -14,7 +14,7 @@ int main() {
   
   for (int i = 0; i < 3; ++i) {
     if (parray[i] == &pointer[i]) {
-      printf("matched!\n");
+      printf("Matched!\n");
     }
     else {
       printf("Fail!\n");
